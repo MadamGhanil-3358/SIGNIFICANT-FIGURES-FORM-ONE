@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Significant Figures | Tarakimu Muhimu | Interactive Math + Sound Quiz</title>
+    <!-- Howler.js for reliable sound -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a1f2e, #0c2a3b);
+            padding: 2rem 1.2rem;
+            animation: pageGlow 0.9s ease;
+        }
+
+        @keyframes pageGlow {
+            0% { opacity: 0; filter: blur(2px);}
+            100% { opacity: 1; filter: blur(0);}
+        }
+
+        .main-container {
+            max-width: 1450px;
+            margin: auto;
+            background: rgba(255, 248, 235, 0.94);
+            backdrop-filter: blur(3px);
+            border-radius: 2.5rem;
+            padding: 1.8rem;
+            box-shadow: 0 30px 45px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 2.6rem;
+            text-align: center;
+            background: linear-gradient(120deg, #ffd966, #e67e22, #d4af37);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card {
+            background: #fffef7;
+            border-radius: 2rem;
+            margin-bottom: 2rem;
+            padding: 1.4rem 1.8rem;
+            transition: all 0.2s;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .card:hover {
+            transform: translateY(-3px);
+        }
+
+        .section-title {
+            font-size: 1.9rem;
+            font-weight: bold;
+            border-left: 10px solid #f39c12;
+            padding-left: 1rem;
+            margin-bottom: 1.2rem;
+            color: #1f4f2b;
+        }
+
+        .meaning-box {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            background: #fff2df;
+            border-radius: 1.5rem;
+            padding: 1.2rem;
+        }
+        .meaning-item {
+            flex: 1;
+            border-radius: 1rem;
+            padding: 0.5rem;
+        }
+        .eng-text {
+            font-weight: 700;
+            color: #1e466e;
+            font-size: 1.05rem;
+        }
+        .swa-text {
+            font-weight: 500;
+            color: #2b6e3c;
+            border-left: 2px dashed #f5bc70;
+            padding-left: 0.8rem;
+        }
+
+        .rule-block {
+            background: #eef4e7;
+            border-radius: 1.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .rule-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #b8651a;
+        }
+        .rule-desc {
+            color: #2d4a22;
+            margin-bottom: 0.6rem;
+        }
+        .mini-examples {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin: 0.6rem 0;
+        }
+        .example-chip {
+            background: #fedba0;
+            padding: 0.2rem 0.9rem;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .questions-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .q-item {
+            background: #fef4e8;
+            border-radius: 1.2rem;
+            padding: 0.8rem;
+            transition: 0.1s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .q-num {
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        .hidden-ans {
+            display: none;
+            background: #c8e6d9;
+            margin-top: 8px;
+            padding: 5px;
+            border-radius: 16px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .study-btn {
+            background: #3b8db0;
+            border: none;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 40px;
+            margin-top: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.1s linear;
+        }
+        .study-btn:active { transform: scale(0.96); background: #e67e22;}
+
+        /* big quiz styles */
+        .quiz200-grid {
+            max-height: 550px;
+            overflow-y: auto;
+            padding-right: 0.8rem;
+        }
+        .quiz200-card {
+            background: #fff6ea;
+            border-radius: 1rem;
+            padding: 0.9rem;
+            margin-bottom: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+            border-left: 6px solid #ffb347;
+        }
+        .quiz200-qtext {
+            flex: 2;
+            font-weight: 600;
+            min-width: 140px;
+        }
+        .quiz200-input {
+            width: 85px;
+            padding: 8px;
+            border-radius: 40px;
+            border: 1px solid #d4a373;
+            text-align: center;
+            font-weight: bold;
+        }
+        .action-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .check200-btn, .reveal200-btn {
+            border: none;
+            background: #2c6e49;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .reveal200-btn {
+            background: #bc6c25;
+        }
+        .check200-btn:active, .reveal200-btn:active {
+            transform: scale(0.94);
+        }
+        .feedback200 {
+            font-size: 0.75rem;
+            width: 100%;
+        }
+        .score-panel {
+            background: #1f2f2c;
+            padding: 0.8rem;
+            border-radius: 3rem;
+            text-align: center;
+            margin: 1rem 0;
+            color: #f7d44a;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .submit-big {
+            background: #f4a261;
+            width: 100%;
+            border: none;
+            padding: 12px;
+            font-size: 1.2rem;
+            border-radius: 60px;
+            font-weight: bold;
+            color: #1f3b2c;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .submit-big:active { transform: scale(0.98); background: #e28743; }
+        footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #e2e8dd;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+        button, .study-btn, .check200-btn, .reveal200-btn, .submit-big {
+            cursor: pointer;
+        }
+        @keyframes softPulse {
+            0% { background: #fff0dd; }
+            100% { background: #fffef7; }
+        }
+        .sound-feedback {
+            animation: softPulse 0.2s ease;
+        }
+    </style>
+</head>
+<body>
+<div class="main-container">
+    <h1>✨ SIGNIFICANT FIGURES | TARAKIMU MUHIMU ✨</h1>
+
+    <!-- MEANING SECTION -->
+    <div class="card">
+        <div class="section-title">📖 Meaning & Importance | Maana na Umuhimu</div>
+        <div class="meaning-box">
+            <div class="meaning-item eng-text">🔢 <strong>Significant figures (Tarakimu Muhimu)</strong> reflect the precision of a measurement. All non-zero digits are significant; captive zeros are significant; leading zeros are never significant; trailing zeros are significant only if a decimal point is present.<br>📌 Example: 0.00520 → 3 sig figs (5,2,0).</div>
+            <div class="meaning-item swa-text">📐 <strong>Tarakimu Muhimu</strong> zinaonyesha usahihi wa kipimo. Tarakimu zote zisizo sifuri ni muhimu; sifuri zilizozingirwa kati ya tarakimu muhimu ni muhimu; sifuri mwanzoni hazina maana; sifuri za mwisho ni muhimu tu ikiwa kuna nukta desimali.<br>📌 Mfano: 0.00520 → tarakimu muhimu 3 (5,2,0).</div>
+        </div>
+    </div>
+
+    <!-- RULES + EACH RULE 10 QUESTIONS (HIDDEN ANSWERS + SOUND) -->
+    <div class="card">
+        <div class="section-title">📜 4 Main Rules + 10 Questions Each | Kanuni 4 + Maswali 10 kila moja</div>
+        <div id="rulesContainer"></div>
+    </div>
+
+    <!-- 200 QUIZ SECTION -->
+    <div class="card">
+        <div class="section-title">🎯 200 QUESTIONS GRAND QUIZ | MTIHANI MKUU WA MASWALI 200</div>
+        <div class="quiz200-grid" id="bigQuizArea"></div>
+        <div class="score-panel" id="bigScoreDisplay">⭐ SCORE: 0 / 200 ⭐</div>
+        <button class="submit-big" id="finalSubmitBtn">✅ SUBMIT FINAL SCORE | WASILISHA ALAMA ✅</button>
+        <div id="submissionGlobalMsg" style="text-align:center; margin-top: 12px; font-weight:bold; color:#2c4c3b;"></div>
+    </div>
+    <footer>🔊 Every click triggers sound effect | Kila bonyezo huleta sauti</footer>
+</div>
+
+<script>
+    // ---------- SOUND SETUP (Howler) ----------
+    const clickFx = new Howl({
+        src: ['https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a73467.mp3?filename=click-21156.mp3'],
+        volume: 0.4
+    });
+    const correctFx = new Howl({
+        src: ['https://cdn.pixabay.com/download/audio/2022/01/18/audio_dd35c0e9f1.mp3?filename=correct-6033.mp3'],
+        volume: 0.45
+    });
+    function playClick() { clickFx.play(); }
+    function playCorrectSound() { correctFx.play(); }
+
+    // ---------- RULES DATA (English & Swahili) ----------
+    const rulesList = [
+        { eng: "Rule 1: Non-zero digits are ALWAYS significant.", swa: "Kanuni 1: Tarakimu zisizo sifuri HUWA muhimu kila wakati." },
+        { eng: "Rule 2: Zeros between non-zero digits are significant.", swa: "Kanuni 2: Sifuri zilizo kati ya tarakimu zisizo sifuri ni muhimu." },
+        { eng: "Rule 3: Leading zeros are NOT significant.", swa: "Kanuni 3: Sifuri za mwanzo SI muhimu." },
+        { eng: "Rule 4: Trailing zeros after decimal point ARE significant.", swa: "Kanuni 4: Sifuri za mwisho baada ya nukta ya desimali NI muhimu." }
+    ];
+
+    // generate 10 questions per rule
+    function generate10Questions(ruleIdx) {
+        let qBank = [];
+        if(ruleIdx === 0) { // non-zero always significant
+            const nums = [123, 45.6, 7891, 3.14, 256, 9.876, 432, 1001, 777, 58.2];
+            const answers = [3, 3, 4, 3, 3, 4, 3, 4, 3, 3];
+            for(let i=0;i<10;i++) qBank.push({ num: nums[i], ans: answers[i] });
+        } else if(ruleIdx === 1) { // zeros between
+            const nums = [101, 2003, 50005, 10203, 909, 10001, 30408, 7007, 120034, 406];
+            const answers = [3,4,5,5,3,5,5,4,6,3];
+            for(let i=0;i<10;i++) qBank.push({ num: nums[i], ans: answers[i] });
+        } else if(ruleIdx === 2) { // leading zeros
+            const nums = [0.0012, 0.045, 0.000309, 0.006, 0.000800, 0.0202, 0.000101, 0.00789, 0.0005, 0.0601];
+            const answers = [2,2,3,1,3,3,3,3,1,3];
+            for(let i=0;i<10;i++) qBank.push({ num: nums[i], ans: answers[i] });
+        } else { // trailing zeros (decimal)
+            const nums = [120.0, 1500., 45.00, 3.0, 100.000, 250.0, 99.90, 12.50, 7.0, 80.];
+            const answers = [4,4,4,2,6,4,4,4,2,2];
+            for(let i=0;i<10;i++) qBank.push({ num: nums[i], ans: answers[i] });
+        }
+        return qBank;
+    }
+
+    // Render rules & 10 questions each with hidden answer toggle + sound
+    function buildAllRules() {
+        let html = '';
+        for(let r=0; r<rulesList.length; r++) {
+            const rule = rulesList[r];
+            html += `
+                <div class="rule-block">
+                    <div class="rule-title">⭐ ${rule.eng}</div>
+                    <div class="rule-desc">📌 ${rule.swa}</div>
+                    <div class="mini-examples">
+                        <span class="example-chip">🔹 Example: ${r===0?'123 → 3 sig figs':r===1?'101 → 3 sig figs':r===2?'0.0012 → 2 sig figs':'120.0 → 4 sig figs'}</span>
+                    </div>
+                    <div><strong>📌 10 questions / maswali 10 :</strong></div>
+                    <div class="questions-row" id="ruleRow-${r}"></div>
+                </div>
+            `;
+        }
+        document.getElementById('rulesContainer').innerHTML = html;
+        // after injecting, populate each row
+        for(let r=0; r<rulesList.length; r++) {
+            const qList = generate10Questions(r);
+            const container = document.getElementById(`ruleRow-${r}`);
+            if(container) {
+                qList.forEach((q, idx) => {
+                    const qDiv = document.createElement('div');
+                    qDiv.className = 'q-item';
+                    qDiv.innerHTML = `
+                        <div class="q-num">❓ ${q.num} : How many sig figs? | Idadi ya tarakimu muhimu?</div>
+                        <div class="hidden-ans" id="hiddenRuleAns_${r}_${idx}">✅ Answer / Jibu: ${q.ans} significant figure(s) | tarakimu muhimu ${q.ans}</div>
+                        <button class="study-btn rule-reveal" data-rule="${r}" data-qidx="${idx}">🔎 Reveal Answer | Onyesha Jibu</button>
+                    `;
+                    container.appendChild(qDiv);
+                });
+                // attach events after creation
+                container.querySelectorAll('.rule-reveal').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        playClick();  // SOUND on every click
+                        const rid = btn.getAttribute('data-rule');
+                        const qid = btn.getAttribute('data-qidx');
+                        const ansDiv = document.getElementById(`hiddenRuleAns_${rid}_${qid}`);
+                        if(ansDiv.style.display === 'none' || ansDiv.style.display === '') {
+                            ansDiv.style.display = 'block';
+                            btn.innerText = '🙈 Hide Answer | Ficha Jibu';
+                        } else {
+                            ansDiv.style.display = 'none';
+                            btn.innerText = '🔎 Reveal Answer | Onyesha Jibu';
+                        }
+                    });
+                });
+            }
+        }
+        // ensure all hidden answers initially invisible
+        document.querySelectorAll('.hidden-ans').forEach(el => el.style.display = 'none');
+    }
+
+    // ---------- 200 QUIZ LOGIC ----------
+    let masterQuestions = [];
+    let userScoreMap = new Array(200).fill(null);
+
+    function generate200Distinct() {
+        let qs = [];
+        for(let i=1; i<=200; i++) {
+            let num, correct;
+            let variant = i % 5;
+            if(variant === 0) {
+                num = Math.floor(Math.random() * 8000 + 200);
+                let str = num.toString().replace(/\./g,'');
+                correct = [...str].filter(ch => ch !== '0').length;
+                if(correct === 0) correct = 2;
+            } else if (variant === 1) {
+                let lead = Math.random() * 0.009 + 0.0001;
+                num = parseFloat(lead.toFixed(6));
+                let strRep = num.toFixed(7);
+                let started = false, cnt=0;
+                for(let ch of strRep) { if(ch !== '0' && ch !== '.') started=true; if(started && ch !== '.') cnt++; }
+                correct = cnt===0?2:cnt;
+            } else if (variant === 2) {
+                let a = Math.floor(Math.random()*9+1);
+                let b = Math.floor(Math.random()*9+1);
+                num = parseInt(`${a}0${b}0${Math.floor(Math.random()*9)}`);
+                correct = num.toString().length;
+            } else if (variant === 3) {
+                num = parseFloat((Math.random() * 500 + 10).toFixed(1)) + 0.0;
+                let integerPart = Math.floor(num);
+                correct = integerPart.toString().length + 1;
+                if(num.toString().includes('.00')) correct = integerPart.toString().length+2;
+            } else {
+                num = Math.floor(Math.random() * 900 + 100);
+                correct = num.toString().length;
+            }
+            if(!correct || correct === 0) correct = 2;
+            qs.push({ id: i, number: num, correctAns: correct });
+        }
+        // fix some reference questions
+        qs[0] = { id:1, number: 0.00520, correctAns:3 };
+        qs[10] = { id:11, number: 100.0, correctAns:4 };
+        qs[50] = { id:51, number: 0.000450, correctAns:3 };
+        qs[99] = { id:100, number: 25000, correctAns:2 };
+        return qs;
+    }
+
+    function renderBigQuiz() {
+        masterQuestions = generate200Distinct();
+        userScoreMap = new Array(200).fill(null);
+        const container = document.getElementById('bigQuizArea');
+        container.innerHTML = '';
+        masterQuestions.forEach((q, idx) => {
+            const card = document.createElement('div');
+            card.className = 'quiz200-card';
+            card.innerHTML = `
+                <div class="quiz200-qtext">${idx+1}. 🔢 ${q.number} : Sig Figs? | Tarakimu muhimu?</div>
+                <input type="number" id="input200_${idx}" class="quiz200-input" placeholder="answer">
+                <div class="action-group">
+                    <button class="check200-btn" data-idx="${idx}">✔ Check & Save | Angalia</button>
+                    <button class="reveal200-btn" data-idx="${idx}">🔎 Reveal | Onyesha Jibu</button>
+                </div>
+                <div id="fb200_${idx}" class="feedback200"></div>
+                <div id="revealedAns200_${idx}" style="display:none; background:#e7e9bb; border-radius:20px; padding:4px 10px; margin-top:6px;">✅ Correct answer: ${q.correctAns} sig fig(s) | tarakimu muhimu ${q.correctAns}</div>
+            `;
+            container.appendChild(card);
+        });
+        attachBigQuizEvents();
+        updateBigScoreDisplay();
+    }
+
+    function attachBigQuizEvents() {
+        document.querySelectorAll('.check200-btn').forEach(btn => {
+            btn.removeEventListener('click', bigCheckHandler);
+            btn.addEventListener('click', bigCheckHandler);
+        });
+        document.querySelectorAll('.reveal200-btn').forEach(btn => {
+            btn.removeEventListener('click', bigRevealHandler);
+            btn.addEventListener('click', bigRevealHandler);
+        });
+    }
+
+    function bigCheckHandler(e) {
+        playClick();
+        const btn = e.currentTarget;
+        const idx = parseInt(btn.getAttribute('data-idx'));
+        const inputEl = document.getElementById(`input200_${idx}`);
+        const userVal = parseInt(inputEl.value);
+        const correctVal = masterQuestions[idx].correctAns;
+        const fbDiv = document.getElementById(`fb200_${idx}`);
+        if(isNaN(userVal)) {
+            fbDiv.innerHTML = '❌ Enter a number! | Ingiza namba!';
+            fbDiv.style.color = '#b33';
+            userScoreMap[idx] = null;
+        } else {
+            if(userVal === correctVal) {
+                fbDiv.innerHTML = '✅ CORRECT! +1 point | SAHIHI! +1 alama';
+                fbDiv.style.color = '#1f6d2f';
+                playCorrectSound();
+                userScoreMap[idx] = true;
+            } else {
+                fbDiv.innerHTML = `❌ Wrong! Correct: ${correctVal}. | Makosa! Jibu sahihi: ${correctVal} tarakimu muhimu`;
+                fbDiv.style.color = '#b4652a';
+                userScoreMap[idx] = false;
+            }
+        }
+        updateBigScoreDisplay();
+    }
+
+    function bigRevealHandler(e) {
+        playClick();
+        const btn = e.currentTarget;
+        const idx = parseInt(btn.getAttribute('data-idx'));
+        const revealDiv = document.getElementById(`revealedAns200_${idx}`);
+        if(revealDiv.style.display === 'none' || revealDiv.style.display === '') {
+            revealDiv.style.display = 'block';
+            btn.innerText = '🙈 Hide | Ficha';
+        } else {
+            revealDiv.style.display = 'none';
+            btn.innerText = '🔎 Reveal | Onyesha Jibu';
+        }
+    }
+
+    function updateBigScoreDisplay() {
+        let scoreCount = 0;
+        for(let i=0; i<userScoreMap.length; i++) {
+            if(userScoreMap[i] === true) scoreCount++;
+        }
+        document.getElementById('bigScoreDisplay').innerHTML = `⭐ SCORE: ${scoreCount} / 200 | ALAMA: ${scoreCount} kati ya 200 ⭐`;
+    }
+
+    document.getElementById('finalSubmitBtn').addEventListener('click', () => {
+        playClick();
+        let final = 0;
+        for(let i=0;i<userScoreMap.length;i++) if(userScoreMap[i] === true) final++;
+        const msgDiv = document.getElementById('submissionGlobalMsg');
+        msgDiv.innerHTML = `🎉🎊 Congratulations! You submitted: ${final}/200. Hongera! Alama yako ${final}/200 tarakimu muhimu 🎊🎉`;
+        msgDiv.style.background = '#ffe6c7';
+        msgDiv.style.padding = '8px';
+        msgDiv.style.borderRadius = '50px';
+        setTimeout(() => {
+            msgDiv.style.transition = '0.3s';
+        }, 100);
+        playCorrectSound();
+    });
+
+    function finalInit() {
+        buildAllRules();
+        renderBigQuiz();
+        const style = document.createElement('style');
+        style.textContent = `button { cursor: pointer; }`;
+        document.head.appendChild(style);
+        // feedback animation for clicks
+        document.body.addEventListener('click', (e) => {
+            if(e.target.closest('button')) {
+                e.target.closest('button').classList.add('sound-feedback');
+                setTimeout(() => {
+                    if(e.target.closest('button')) e.target.closest('button').classList.remove('sound-feedback');
+                }, 150);
+            }
+        });
+    }
+
+    finalInit();
+</script>
+</body>
+</html>
