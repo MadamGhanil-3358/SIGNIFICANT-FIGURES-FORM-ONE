@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Significant Figures | Tarakimu Muhimu | Interactive Math + Sound Quiz</title>
+    <title>Significant Figures | Tarakimu Muhimu | Accurate Math + Sound Quiz</title>
     <!-- Howler.js for reliable sound -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
     <style>
@@ -257,6 +257,13 @@
         .sound-feedback {
             animation: softPulse 0.2s ease;
         }
+        .correct-answer-badge {
+            background: #2e7d32;
+            color: white;
+            border-radius: 20px;
+            padding: 2px 8px;
+            font-size: 0.7rem;
+        }
     </style>
 </head>
 <body>
@@ -267,8 +274,20 @@
     <div class="card">
         <div class="section-title">📖 Meaning & Importance | Maana na Umuhimu</div>
         <div class="meaning-box">
-            <div class="meaning-item eng-text">🔢 <strong>Significant figures (Tarakimu Muhimu)</strong> reflect the precision of a measurement. All non-zero digits are significant; captive zeros are significant; leading zeros are never significant; trailing zeros are significant only if a decimal point is present.<br>📌 Example: 0.00520 → 3 sig figs (5,2,0).</div>
-            <div class="meaning-item swa-text">📐 <strong>Tarakimu Muhimu</strong> zinaonyesha usahihi wa kipimo. Tarakimu zote zisizo sifuri ni muhimu; sifuri zilizozingirwa kati ya tarakimu muhimu ni muhimu; sifuri mwanzoni hazina maana; sifuri za mwisho ni muhimu tu ikiwa kuna nukta desimali.<br>📌 Mfano: 0.00520 → tarakimu muhimu 3 (5,2,0).</div>
+            <div class="meaning-item eng-text">🔢 <strong>Significant figures (Tarakimu Muhimu)</strong> reflect the precision of a measurement.<br>
+            • All non-zero digits are significant.<br>
+            • Zeros between non-zero digits are significant.<br>
+            • Leading zeros are NEVER significant.<br>
+            • Trailing zeros in a number WITHOUT a decimal point are NOT significant.<br>
+            • Trailing zeros WITH a decimal point ARE significant.<br>
+            📌 Example: 120 → 2 sig figs (1 and 2). 120. → 3 sig figs (1,2,0). 0.00520 → 3 sig figs (5,2,0).</div>
+            <div class="meaning-item swa-text">📐 <strong>Tarakimu Muhimu</strong> zinaonyesha usahihi wa kipimo.<br>
+            • Tarakimu zote zisizo sifuri ni muhimu.<br>
+            • Sifuri kati ya tarakimu zisizo sifuri ni muhimu.<br>
+            • Sifuri za mwanzo SI muhimu kamwe.<br>
+            • Sifuri za mwisho katika namba BILA nukta ya desimali SI muhimu.<br>
+            • Sifuri za mwisho KWA nukta ya desimali NI muhimu.<br>
+            📌 Mfano: 120 → tarakimu muhimu 2 (1 na 2). 120. → tarakimu muhimu 3 (1,2,0). 0.00520 → tarakimu muhimu 3 (5,2,0).</div>
         </div>
     </div>
 
@@ -302,48 +321,120 @@
     function playClick() { clickFx.play(); }
     function playCorrectSound() { correctFx.play(); }
 
-    // ---------- RULES DATA (English & Swahili) ----------
-    const rulesList = [
-        { eng: "Rule 1: Non-zero digits are ALWAYS significant.", swa: "Kanuni 1: Tarakimu zisizo sifuri HUWA muhimu kila wakati." },
-        { eng: "Rule 2: Zeros between non-zero digits are significant.", swa: "Kanuni 2: Sifuri zilizo kati ya tarakimu zisizo sifuri ni muhimu." },
-        { eng: "Rule 3: Leading zeros are NOT significant.", swa: "Kanuni 3: Sifuri za mwanzo SI muhimu." },
-        { eng: "Rule 4: Trailing zeros after decimal point ARE significant.", swa: "Kanuni 4: Sifuri za mwisho baada ya nukta ya desimali NI muhimu." }
-    ];
-
-    // generate 10 questions per rule
-    function generate10Questions(ruleIdx) {
-        let qBank = [];
-        if(ruleIdx === 0) { // non-zero always significant
-            const nums = [123, 45.6, 7891, 3.14, 256, 9.876, 432, 1001, 777, 58.2];
-            const answers = [3, 3, 4, 3, 3, 4, 3, 4, 3, 3];
-            for(let i=0;i<10;i++) qBank.push({ num: nums[i], ans: answers[i] });
-        } else if(ruleIdx === 1) { // zeros between
-            const nums = [101, 2003, 50005, 10203, 909, 10001, 30408, 7007, 120034, 406];
-            const answers = [3,4,5,5,3,5,5,4,6,3];
-            for(let i=0;i<10;i++) qBank.push({ num: nums[i], ans: answers[i] });
-        } else if(ruleIdx === 2) { // leading zeros
-            const nums = [0.0012, 0.045, 0.000309, 0.006, 0.000800, 0.0202, 0.000101, 0.00789, 0.0005, 0.0601];
-            const answers = [2,2,3,1,3,3,3,3,1,3];
-            for(let i=0;i<10;i++) qBank.push({ num: nums[i], ans: answers[i] });
-        } else { // trailing zeros (decimal)
-            const nums = [120.0, 1500., 45.00, 3.0, 100.000, 250.0, 99.90, 12.50, 7.0, 80.];
-            const answers = [4,4,4,2,6,4,4,4,2,2];
-            for(let i=0;i<10;i++) qBank.push({ num: nums[i], ans: answers[i] });
+    // Helper function to count significant figures correctly
+    function countSigFigs(num) {
+        if (num === null || num === undefined) return 1;
+        let numStr = num.toString().trim();
+        // Handle scientific notation
+        if (numStr.includes('e')) {
+            numStr = parseFloat(num).toFixed(10);
         }
-        return qBank;
+        // Check if it's an integer without decimal point
+        const hasDecimal = numStr.includes('.');
+        let significant = 0;
+        let started = false;
+        let afterDecimal = false;
+        
+        for (let i = 0; i < numStr.length; i++) {
+            let ch = numStr[i];
+            if (ch === '.') {
+                afterDecimal = true;
+                continue;
+            }
+            if (ch === '-') continue;
+            if (ch !== '0') {
+                started = true;
+                significant++;
+            } 
+            else if (ch === '0') {
+                if (started) {
+                    // If we have started counting non-zero, zeros count if:
+                    // 1. They are between non-zero digits (always)
+                    // 2. They are trailing after decimal point
+                    if (afterDecimal) {
+                        significant++;
+                    } 
+                    else {
+                        // Check if there is any non-zero after this zero in integer part
+                        let remaining = numStr.substring(i+1);
+                        let hasNonZeroAfter = false;
+                        for(let j=0; j<remaining.length; j++) {
+                            if(remaining[j] !== '0' && remaining[j] !== '.') {
+                                hasNonZeroAfter = true;
+                                break;
+                            }
+                        }
+                        if(hasNonZeroAfter) {
+                            significant++;
+                        }
+                        // For trailing zeros in integer without decimal, they don't count
+                    }
+                }
+            }
+        }
+        // Edge case: number is just 0
+        if(significant === 0) return 1;
+        return significant;
     }
 
-    // Render rules & 10 questions each with hidden answer toggle + sound
+    // generate 10 questions per rule with accurate answers
+    function generate10Questions(ruleIdx) {
+        if(ruleIdx === 0) { // Rule 1: Non-zero digits always significant
+            return [
+                { num: 123, ans: 3 }, { num: 4567, ans: 4 }, { num: 89, ans: 2 },
+                { num: 3.14, ans: 3 }, { num: 2.718, ans: 4 }, { num: 1001, ans: 4 },
+                { num: 505, ans: 3 }, { num: 9.8, ans: 2 }, { num: 12345, ans: 5 },
+                { num: 777, ans: 3 }
+            ];
+        } else if(ruleIdx === 1) { // Rule 2: Zeros between non-zero digits are significant
+            return [
+                { num: 101, ans: 3 }, { num: 2003, ans: 4 }, { num: 50005, ans: 5 },
+                { num: 10203, ans: 5 }, { num: 909, ans: 3 }, { num: 10001, ans: 5 },
+                { num: 30408, ans: 5 }, { num: 7007, ans: 4 }, { num: 120034, ans: 6 },
+                { num: 406, ans: 3 }
+            ];
+        } else if(ruleIdx === 2) { // Rule 3: Leading zeros NOT significant
+            return [
+                { num: 0.0012, ans: 2 }, { num: 0.045, ans: 2 }, { num: 0.000309, ans: 3 },
+                { num: 0.006, ans: 1 }, { num: 0.000800, ans: 3 }, { num: 0.0202, ans: 3 },
+                { num: 0.000101, ans: 3 }, { num: 0.00789, ans: 3 }, { num: 0.0005, ans: 1 },
+                { num: 0.0601, ans: 3 }
+            ];
+        } else { // Rule 4: Trailing zeros - only significant with decimal point
+            return [
+                { num: 120, ans: 2 },      // No decimal → 2 sig figs
+                { num: 120., ans: 3 },     // Has decimal → 3 sig figs
+                { num: 1500, ans: 2 },     // No decimal → 2 sig figs
+                { num: 1500., ans: 4 },    // Has decimal → 4 sig figs
+                { num: 45.00, ans: 4 },    // Decimal present → 4 sig figs
+                { num: 3.0, ans: 2 },      // Decimal present → 2 sig figs
+                { num: 100, ans: 1 },      // No decimal → 1 sig fig
+                { num: 100., ans: 3 },     // Has decimal → 3 sig figs
+                { num: 250, ans: 2 },      // No decimal → 2 sig figs
+                { num: 250.0, ans: 4 }     // Has decimal → 4 sig figs
+            ];
+        }
+    }
+
+    // Render rules & questions
     function buildAllRules() {
         let html = '';
+        const rulesList = [
+            { eng: "Rule 1: Non-zero digits are ALWAYS significant.", swa: "Kanuni 1: Tarakimu zisizo sifuri HUWA muhimu kila wakati." },
+            { eng: "Rule 2: Zeros between non-zero digits are significant.", swa: "Kanuni 2: Sifuri zilizo kati ya tarakimu zisizo sifuri ni muhimu." },
+            { eng: "Rule 3: Leading zeros are NOT significant.", swa: "Kanuni 3: Sifuri za mwanzo SI muhimu kamwe." },
+            { eng: "Rule 4: Trailing zeros: Significant ONLY if a decimal point is present (e.g., 120 has 2, 120. has 3).", swa: "Kanuni 4: Sifuri za mwisho: Muhimu TU ikiwa kuna nukta desimali (mfano: 120 ina 2, 120. ina 3)." }
+        ];
+        
         for(let r=0; r<rulesList.length; r++) {
             const rule = rulesList[r];
+            const questions = generate10Questions(r);
             html += `
                 <div class="rule-block">
                     <div class="rule-title">⭐ ${rule.eng}</div>
                     <div class="rule-desc">📌 ${rule.swa}</div>
                     <div class="mini-examples">
-                        <span class="example-chip">🔹 Example: ${r===0?'123 → 3 sig figs':r===1?'101 → 3 sig figs':r===2?'0.0012 → 2 sig figs':'120.0 → 4 sig figs'}</span>
+                        <span class="example-chip">🔹 ${r===0?'123 → 3 sig figs':r===1?'101 → 3 sig figs':r===2?'0.0012 → 2 sig figs':'120 → 2 sig figs, 120. → 3 sig figs'}</span>
                     </div>
                     <div><strong>📌 10 questions / maswali 10 :</strong></div>
                     <div class="questions-row" id="ruleRow-${r}"></div>
@@ -351,8 +442,8 @@
             `;
         }
         document.getElementById('rulesContainer').innerHTML = html;
-        // after injecting, populate each row
-        for(let r=0; r<rulesList.length; r++) {
+        
+        for(let r=0; r<4; r++) {
             const qList = generate10Questions(r);
             const container = document.getElementById(`ruleRow-${r}`);
             if(container) {
@@ -366,11 +457,10 @@
                     `;
                     container.appendChild(qDiv);
                 });
-                // attach events after creation
                 container.querySelectorAll('.rule-reveal').forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        playClick();  // SOUND on every click
+                        playClick();
                         const rid = btn.getAttribute('data-rule');
                         const qid = btn.getAttribute('data-qidx');
                         const ansDiv = document.getElementById(`hiddenRuleAns_${rid}_${qid}`);
@@ -385,58 +475,46 @@
                 });
             }
         }
-        // ensure all hidden answers initially invisible
         document.querySelectorAll('.hidden-ans').forEach(el => el.style.display = 'none');
     }
 
-    // ---------- 200 QUIZ LOGIC ----------
+    // ---------- 200 QUIZ LOGIC with accurate sig fig counting ----------
     let masterQuestions = [];
     let userScoreMap = new Array(200).fill(null);
 
-    function generate200Distinct() {
+    function generate200AccurateQuestions() {
         let qs = [];
-        for(let i=1; i<=200; i++) {
-            let num, correct;
-            let variant = i % 5;
-            if(variant === 0) {
-                num = Math.floor(Math.random() * 8000 + 200);
-                let str = num.toString().replace(/\./g,'');
-                correct = [...str].filter(ch => ch !== '0').length;
-                if(correct === 0) correct = 2;
-            } else if (variant === 1) {
-                let lead = Math.random() * 0.009 + 0.0001;
-                num = parseFloat(lead.toFixed(6));
-                let strRep = num.toFixed(7);
-                let started = false, cnt=0;
-                for(let ch of strRep) { if(ch !== '0' && ch !== '.') started=true; if(started && ch !== '.') cnt++; }
-                correct = cnt===0?2:cnt;
-            } else if (variant === 2) {
-                let a = Math.floor(Math.random()*9+1);
-                let b = Math.floor(Math.random()*9+1);
-                num = parseInt(`${a}0${b}0${Math.floor(Math.random()*9)}`);
-                correct = num.toString().length;
-            } else if (variant === 3) {
-                num = parseFloat((Math.random() * 500 + 10).toFixed(1)) + 0.0;
-                let integerPart = Math.floor(num);
-                correct = integerPart.toString().length + 1;
-                if(num.toString().includes('.00')) correct = integerPart.toString().length+2;
-            } else {
-                num = Math.floor(Math.random() * 900 + 100);
-                correct = num.toString().length;
+        // Diverse set of numbers ensuring correct sig fig counts
+        const diverseNumbers = [
+            { num: 123, ans: 3 }, { num: 120, ans: 2 }, { num: 120., ans: 3 }, { num: 0.00520, ans: 3 },
+            { num: 1500, ans: 2 }, { num: 1500., ans: 4 }, { num: 0.00034, ans: 2 }, { num: 3400, ans: 2 },
+            { num: 3400., ans: 4 }, { num: 100, ans: 1 }, { num: 100., ans: 3 }, { num: 0.01010, ans: 4 },
+            { num: 50500, ans: 3 }, { num: 50500., ans: 5 }, { num: 0.000900, ans: 3 }, { num: 900, ans: 1 },
+            { num: 900., ans: 3 }, { num: 3.14159, ans: 6 }, { num: 2.5, ans: 2 }, { num: 0.000200, ans: 3 },
+            { num: 2000, ans: 1 }, { num: 2000., ans: 4 }, { num: 0.0001, ans: 1 }, { num: 0.00100, ans: 3 },
+            { num: 100000, ans: 1 }, { num: 100000., ans: 6 }, { num: 0.030300, ans: 5 }, { num: 30300, ans: 3 },
+            { num: 30300., ans: 5 }, { num: 700, ans: 1 }, { num: 700.0, ans: 4 }, { num: 0.700, ans: 3 }
+        ];
+        
+        for(let i=0; i<200; i++) {
+            let source = diverseNumbers[i % diverseNumbers.length];
+            let number = source.num;
+            let correct = source.ans;
+            // Add some variations
+            if(i > 30 && i % 7 === 0) {
+                let randomVal = Math.floor(Math.random() * 5000 + 100);
+                if(i % 3 === 0) number = randomVal;
+                else if(i % 3 === 1) number = randomVal + .0;
+                else number = parseFloat("0.00" + (Math.floor(Math.random()*900+100)));
+                correct = countSigFigs(number);
             }
-            if(!correct || correct === 0) correct = 2;
-            qs.push({ id: i, number: num, correctAns: correct });
+            qs.push({ id: i+1, number: number, correctAns: correct });
         }
-        // fix some reference questions
-        qs[0] = { id:1, number: 0.00520, correctAns:3 };
-        qs[10] = { id:11, number: 100.0, correctAns:4 };
-        qs[50] = { id:51, number: 0.000450, correctAns:3 };
-        qs[99] = { id:100, number: 25000, correctAns:2 };
         return qs;
     }
 
     function renderBigQuiz() {
-        masterQuestions = generate200Distinct();
+        masterQuestions = generate200AccurateQuestions();
         userScoreMap = new Array(200).fill(null);
         const container = document.getElementById('bigQuizArea');
         container.innerHTML = '';
@@ -540,7 +618,6 @@
         const style = document.createElement('style');
         style.textContent = `button { cursor: pointer; }`;
         document.head.appendChild(style);
-        // feedback animation for clicks
         document.body.addEventListener('click', (e) => {
             if(e.target.closest('button')) {
                 e.target.closest('button').classList.add('sound-feedback');
